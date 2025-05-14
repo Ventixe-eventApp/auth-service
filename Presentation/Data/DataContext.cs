@@ -3,11 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Presentation.Data;
 
-public class DataContext : IdentityDbContext
+public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<UserEntity>(options)
 {
-    public DataContext(DbContextOptions<DataContext> options) : base(options)
-    {
-    }
 
- 
 }
