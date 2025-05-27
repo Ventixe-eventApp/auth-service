@@ -13,9 +13,5 @@ public class AuthResult<T> : AuthResult
  
 }
 
-public class AccountResult<T> : AccountResult
-{
-    public T? Result { get; set; }
 
-}
 
