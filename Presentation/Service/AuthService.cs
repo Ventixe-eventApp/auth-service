@@ -17,19 +17,20 @@ public class AuthService : IAuthService
         return true;
     }
 
-    public async Task<AuthResult> RegisterUserAsync(UserRegistationForm form)
+
+    public async Task<AuthResult<string>> RegisterUserAsync(UserRegistationForm form)
     {
         var exists = await AlreadyExistAsync(form.Email);
         if (exists)
         {
-            return new AuthResult
+            return new AuthResult<string>
             {
                 Succeeded = false,
                 StatusCode = 400,
                 Error = "Email already exists"
             };
-           
         }
+
         using var http = new HttpClient();
 
         var registerRequest = new RegisterAccountRequest
@@ -43,7 +44,6 @@ public class AuthService : IAuthService
         if (!accountResponse.IsSuccessStatusCode)
         {
             var error = await accountResponse.Content.ReadAsStringAsync();
-
             return new AuthResult<string>
             {
                 Succeeded = false,
@@ -70,7 +70,6 @@ public class AuthService : IAuthService
             StatusCode = 200,
             Result = accountData.UserId
         };
-
     }
 
     public async Task<AuthResult> RegisterUserProfileAsync(UserProfileRequest request)

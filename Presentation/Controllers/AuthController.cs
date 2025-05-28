@@ -22,21 +22,30 @@ public class AuthController(IAuthService authService) : ControllerBase
                     kvp => kvp.Key,
                     kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray()
                 );
-            return BadRequest(new { sucess = false, errors });
+
+            return BadRequest(new { success = false, errors });
         }
 
         var result = await _authService.RegisterUserAsync(form);
+
         if (result.Succeeded)
         {
-            return Ok(new { message = "User created successfully" });
+            return Ok(new
+            {
+                success = true,
+                message = "User created successfully",
+                userId = result.Result 
+            });
         }
-        else
-        {
 
-            return BadRequest(new { message = result.Error });
-        }
+        return BadRequest(new
+        {
+            success = false,
+            message = result.Error
+        });
     }
 
+   
     [HttpPost("createprofile")]
     public async Task<IActionResult> RegisterUserProfileAsync([FromBody] UserProfileRequest request)
     {
@@ -87,5 +96,7 @@ public class AuthController(IAuthService authService) : ControllerBase
             return BadRequest(new { message = result.Error });
         }
     }
+
+
 
 }
