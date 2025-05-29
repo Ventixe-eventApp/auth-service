@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using Presentation.Models;
 using System.Net.Http.Json;
 
@@ -74,7 +75,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthResult> RegisterUserProfileAsync(UserProfileRequest request)
     {
-       
+
         using var http = new HttpClient();
         var response = await http.PostAsJsonAsync("https://localhost:7026/api/Users/create", request);
         if (response.IsSuccessStatusCode)
@@ -96,21 +97,94 @@ public class AuthService : IAuthService
             };
         }
     }
- 
 
-    public async Task<AuthResult> LoginAsync(LoginRequest request)
+
+    public async Task<AuthResult<LoginResponse>> LoginAsync(LoginRequest request)
     {
         using var http = new HttpClient();
+
         var response = await http.PostAsJsonAsync("https://localhost:7150/api/accounts/login", request);
 
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            return new AuthResult<LoginResponse>
+            {
+                Succeeded = false,
+                StatusCode = (int)response.StatusCode,
+                Error = $"Login failed: {error}"
+            };
+        }
+
+
+        var loginResponse = await response.Content.ReadFromJsonAsync<AccountResult<LoginWithAccountResponse>>();
+
+        if (loginResponse == null || loginResponse.Result == null )
+        {
+            return new AuthResult<LoginResponse>
+            {
+                Succeeded = false,
+                StatusCode = 400,
+                Error = "Invalid login response from AccountService"
+
+            };
+        }
+        
+        var userId = loginResponse.Result.UserId;
+
+        var userResponse = await http.GetAsync($"https://localhost:7026/api/users/{userId}");
+
+        if (!userResponse.IsSuccessStatusCode)
+        {
+            var error = await userResponse.Content.ReadAsStringAsync();
+            return new AuthResult<LoginResponse>
+            {
+                Succeeded = false,
+                StatusCode = (int)userResponse.StatusCode,
+                Error = $"Failed to retrieve user profile: {error}"
+            };
+        }
+
+        var userResult = await userResponse.Content.ReadFromJsonAsync<UserResult<User>>();
+
+        if (userResult == null || userResult.Result == null)
+        {
+            return new AuthResult<LoginResponse>
+            {
+                Succeeded = false,
+                StatusCode = 404,
+                Error = "No user profile found"
+            };
+        }
+
+        var user = userResult.Result;
+
+
+        return new AuthResult<LoginResponse>
+        {
+            Succeeded = true,
+            StatusCode = 200,
+            Result = new LoginResponse
+            {
+                UserId = user.UserId,
+                FirstName = user.FirstName!,
+                LastName = user.LastName!,
+                Email = request.Email
+            }
+        };
+    }
+
+    public async Task<AuthResult> LogoutAsync()
+    {
+        using var http = new HttpClient();
+
+        var response = await http.PostAsync("https://localhost:7150/api/accounts/logout", null);
         if (response.IsSuccessStatusCode)
         {
-            var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            return new AuthResult<string>
+            return new AuthResult
             {
                 Succeeded = true,
-                StatusCode = 200,
-                Result = loginResponse?.UserId
+                StatusCode = 200
             };
         }
         else
@@ -120,10 +194,8 @@ public class AuthService : IAuthService
             {
                 Succeeded = false,
                 StatusCode = (int)response.StatusCode,
-                Error = $"Login failed: {error}"
+                Error = $"Logout failed: {error}"
             };
         }
     }
-
-
 }

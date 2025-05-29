@@ -89,7 +89,12 @@ public class AuthController(IAuthService authService) : ControllerBase
 
         if (result.Succeeded)
         {
-            return Ok(new { message = "Login successful"});
+            return Ok(new
+            {
+                success = true,
+                user = result.Result
+            });
+
         }
         else
         {
@@ -97,6 +102,18 @@ public class AuthController(IAuthService authService) : ControllerBase
         }
     }
 
-
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+     var result = await _authService.LogoutAsync();
+        if (result.Succeeded)
+        {
+            return Ok(new { message = "Logout successful" });
+        }
+        else
+        {
+            return BadRequest(new { message = result.Error });
+        }
+    }
 
 }

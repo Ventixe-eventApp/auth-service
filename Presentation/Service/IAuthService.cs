@@ -6,7 +6,8 @@ public interface IAuthService
 {
 
     Task<bool> AlreadyExistAsync(string email);
-    Task<AuthResult> LoginAsync(LoginRequest request);
     Task<AuthResult> RegisterUserProfileAsync(UserProfileRequest request);
     Task<AuthResult<string>> RegisterUserAsync(UserRegistationForm form);
+    Task<AuthResult<LoginResponse>> LoginAsync(LoginRequest request);
+    Task<AuthResult> LogoutAsync();
 }

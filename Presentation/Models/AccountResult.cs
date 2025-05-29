@@ -7,3 +7,8 @@ public class AccountResult
     public string? Error { get; set; }
 }
 
+public class AccountResult<T> : AccountResult
+{
+    public T? Result { get; set; }
+}
+
