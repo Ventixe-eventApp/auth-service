@@ -10,7 +10,7 @@ public class AuthService : IAuthService
     public async Task<bool> AlreadyExistAsync(string email)
     {
         using var http = new HttpClient();
-        var response = await http.GetFromJsonAsync<AccountResult>($"https://localhost:7150/api/accounts/exists?email={email}");
+        var response = await http.GetFromJsonAsync<AccountResult>($"https://account-service-ventixe-cjckd8czgcbzaxae.swedencentral-01.azurewebsites.net/api/Accounts/exists?email={email}");
 
         if (!response.Succeeded)
             return false;
@@ -40,7 +40,7 @@ public class AuthService : IAuthService
             Password = form.Password
         };
 
-        var accountResponse = await http.PostAsJsonAsync("https://localhost:7150/api/accounts/register", registerRequest);
+        var accountResponse = await http.PostAsJsonAsync("https://account-service-ventixe-cjckd8czgcbzaxae.swedencentral-01.azurewebsites.net/api/Accounts/register", registerRequest);
 
         if (!accountResponse.IsSuccessStatusCode)
         {
@@ -77,7 +77,7 @@ public class AuthService : IAuthService
     {
 
         using var http = new HttpClient();
-        var response = await http.PostAsJsonAsync("https://localhost:7026/api/Users/create", request);
+        var response = await http.PostAsJsonAsync("https://user-service-ventixe-csdza2gsg8aee6cf.swedencentral-01.azurewebsites.net/api/Users/create", request);
         if (response.IsSuccessStatusCode)
         {
             return new AuthResult
@@ -103,7 +103,7 @@ public class AuthService : IAuthService
     {
         using var http = new HttpClient();
 
-        var response = await http.PostAsJsonAsync("https://localhost:7150/api/accounts/login", request);
+        var response = await http.PostAsJsonAsync("https://account-service-ventixe-cjckd8czgcbzaxae.swedencentral-01.azurewebsites.net/api/Accounts/login", request);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -132,7 +132,7 @@ public class AuthService : IAuthService
         
         var userId = loginResponse.Result.UserId;
 
-        var userResponse = await http.GetAsync($"https://localhost:7026/api/users/{userId}");
+        var userResponse = await http.GetAsync($"https://user-service-ventixe-csdza2gsg8aee6cf.swedencentral-01.azurewebsites.net/api/Users/{userId}");
 
         if (!userResponse.IsSuccessStatusCode)
         {
@@ -178,7 +178,7 @@ public class AuthService : IAuthService
     {
         using var http = new HttpClient();
 
-        var response = await http.PostAsync("https://localhost:7150/api/accounts/logout", null);
+        var response = await http.PostAsync("https://account-service-ventixe-cjckd8czgcbzaxae.swedencentral-01.azurewebsites.net/api/Accounts/logout", null);
         if (response.IsSuccessStatusCode)
         {
             return new AuthResult

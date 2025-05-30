@@ -12,6 +12,3 @@ public class AuthResult<T> : AuthResult
     public T? Result { get; set; }
  
 }
-
-
-
