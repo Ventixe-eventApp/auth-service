@@ -12,16 +12,18 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 var app = builder.Build();
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Event API V1");
-        c.RoutePrefix = string.Empty;
-    });
+//if (app.Environment.IsDevelopment())
+//{
+   
 
-}
+//}
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Event API V1");
+    c.RoutePrefix = string.Empty;
+});
 app.MapOpenApi();
 app.UseHttpsRedirection();
 app.UseCors(x => x
